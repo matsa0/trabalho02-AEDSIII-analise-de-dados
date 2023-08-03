@@ -1,64 +1,66 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import pandas as pd
 from graph import Graph
+import matplotlib.pyplot as plt
 
 G = nx.Graph()
+g = Graph()
 
-#dando nome para as colunas dos arquivos, afim de facilitar manipulá-las.
+# Dando nome para as colunas dos arquivos, afim de facilitar manipulá-las.
 col_politicians = ['congressman', 'party', 'votes']
 col_graph = ['congressman1', 'congressman2', 'weight']
 
-#Primeira interação
+# Primeira interação
 year = int(input("Digite o ano que você deseja filtrar as informações > "))
 
-politicians_data = pd.read_csv(f"datasets/politicians{year}.csv", encoding='utf-8', delimiter=';',header=None, names=col_politicians, engine='python')
+politicians_data = pd.read_csv(f"datasets/politicians{year}.csv", encoding='utf-8', delimiter=';', header=None, names=col_politicians, engine='python')
 graph_data = pd.read_csv(f"datasets/graph{year}.csv", encoding='utf-8', delimiter=';', header=None, names=col_graph, engine='python')
 
+parties_to_filter = [] # Lista de partidos que o usuário quer filtrar
 
-
-parties_to_filter = [] #Lista de partidos que o usuário quer filtrar
-
-
-
-#Segunda interação
-value = int(input("Você deseja filtrar por partidos? ['0' para NÃO | '1' para SIM] > "))
+# Segunda interação
+value = int(input("Você deseja filtrar por partidos? ['0' para NÃO || '1' para SIM] > "))
 if value == 1:
     amount = int(input("Digite a quantidade de partidos > "))
     for _ in range(amount):
         party = input("Digite o partido > ").upper()
         parties_to_filter.append(party) 
 
-"""     se o partido percorrido está no vetor parties_to_filter, preciso filtrar os deputados desses partidos, 
-        adicionar o nó deles, as arestas entre eles e o peso        """
-
-
-#verificando quais partidos do politicians estão no vetor parties_to_filter
+# Verificando quais partidos do politicians estão no vetor parties_to_filter
 filtered_politicians = politicians_data[politicians_data['party'].isin(parties_to_filter)] 
 
-for dept in filtered_politicians['congressman']: #iterando sobre a coluna dos deputados após filtrar os partidos
+for dept in filtered_politicians['congressman']: # Iterando sobre a coluna dos deputados após filtrar os partidos
     G.add_node(dept)
 
 for index, row in graph_data.iterrows():
-    c1 = row.congressman1 #pegando o primeiro deputado  
-    c2 = row.congressman2 #pegando o segundo deputado
-    w = row.weight #pegando o peso
+    c1 = row.congressman1 # Pegando o primeiro deputado  
+    c2 = row.congressman2 # Pegando o segundo deputado
+    w = row.weight # Pegando o peso
 
-    #pega os depurtados que estão filtrados pelos partidos em filtered_politicians
+    # Pegando os deputados que estão filtrados pelos partidos em filtered_politicians
     if c1 in filtered_politicians['congressman'].values and c2 in filtered_politicians['congressman'].values: 
         G.add_edge(c1, c2, weight=w)
 
 
-
-
-
 if value == 0:
     for index, row in politicians_data.iterrows():
-        G.add_node(row['congressman'], votes=row['votes'])  #Adicionando o nó com o atributo 'votes'
+        G.add_node(row['congressman'], votes=row['votes'])  # Adicionando o nó com o atributo 'votes'
+        g.add_node(row['congressman'])
 
     for index, row in graph_data.iterrows():
-        G.add_edge(row['congressman1'], row['congressman2'], weight=row['weight'])  #Adicionando a aresta com o atributo 'weight'
+        c1 = row.congressman1  # Pegando o primeiro deputado  
+        c2 = row.congressman2  # Pegando o segundo deputado
+        w = row.weight  # Pegando o peso
+        min_vote = min(G.nodes[c1]['votes'], G.nodes[c2]['votes'])  # G.nodes() permite que possamos acessar os atributos desse nó.
+        normalization = w / min_vote
+        G.add_edge(c1, c2, weight=normalization)  # Adicionando a aresta com o atributo 'weight'
+        g.add_edge(c1, c2, weight=normalization)  # Adicionando a aresta com o atributo 'weight'
 
+print(G)
+
+plt.figure(1)
+nx.draw_networkx(G, pos=nx.spring_layout(G), with_labels=True) #utilizando o layout spring
+plt.show()
 
 
 '''
@@ -86,15 +88,14 @@ v -> deputado 'v'
 
 
 
-""" plt.figure(1)
-nx.draw_networkx(G, pos=nx.spring_layout(G), with_labels=True) #utilizando o layout spring
-plt.show() """
 
-print(G.number_of_nodes())
+
+""" print(G.number_of_nodes())
 print(G.number_of_edges())
+print(g.node_count)
+print(g.edge_count)
 
-""" adj_list = nx.to_dict_of_lists(G) #converte um grafo em um dicionário de listas de adjacências. 
-print(adj_list) """
+print(g) """
 
 
 
