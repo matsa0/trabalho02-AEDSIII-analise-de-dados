@@ -26,6 +26,8 @@ if value == 1:
         party = input("Digite o partido > ").upper()
         parties_to_filter.append(party) 
 
+threshold = float(input("Digite o threshold mínimo > "))
+
 # Verificando quais partidos do politicians estão no vetor parties_to_filter
 filtered_politicians = politicians_data[politicians_data['party'].isin(parties_to_filter)] 
 
@@ -39,7 +41,16 @@ for index, row in graph_data.iterrows():
 
     # Pegando os deputados que estão filtrados pelos partidos em filtered_politicians
     if c1 in filtered_politicians['congressman'].values and c2 in filtered_politicians['congressman'].values: 
-        G.add_edge(c1, c2, weight=w)
+        if value == 1:
+            min_vote = min(politicians_data.loc[politicians_data['congressman'] == c1, 'votes'].values[0],
+                           politicians_data.loc[politicians_data['congressman'] == c2, 'votes'].values[0])
+            
+        normalization = w / min_vote
+
+        if normalization >= threshold:
+            G.add_edge(c1, c2, weight=normalization)
+        elif G.has_edge(c1, c2):
+            G.remove_edge(c1, c2)
 
 
 if value == 0:
@@ -48,13 +59,18 @@ if value == 0:
         g.add_node(row['congressman'])
 
     for index, row in graph_data.iterrows():
-        c1 = row.congressman1  # Pegando o primeiro deputado  
-        c2 = row.congressman2  # Pegando o segundo deputado
-        w = row.weight  # Pegando o peso
-        min_vote = min(G.nodes[c1]['votes'], G.nodes[c2]['votes'])  # G.nodes() permite que possamos acessar os atributos desse nó.
+        c1 = row.congressman1  
+        c2 = row.congressman2  
+        w = row.weight  
+        min_vote = min(G.nodes[c1]['votes'], G.nodes[c2]['votes'])  #G.nodes() permite que possamos acessar os atributos desse nó.
         normalization = w / min_vote
-        G.add_edge(c1, c2, weight=normalization)  # Adicionando a aresta com o atributo 'weight'
-        g.add_edge(c1, c2, weight=normalization)  # Adicionando a aresta com o atributo 'weight'
+
+        if normalization >= threshold:
+            G.add_edge(c1, c2, weight=normalization)
+        elif G.has_edge(c1, c2):
+            G.remove_edge(c1, c2)
+
+
 
 print(G)
 

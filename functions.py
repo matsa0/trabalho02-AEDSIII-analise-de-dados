@@ -39,7 +39,7 @@ class Functions:
         return G
 
     @staticmethod
-    def normalize_weights(G):
+    def normalize_edge_weights(G):
         for c1, c2, w in G.edges(data='weight'):
             min_vote = min(G.nodes[c1]['votes'], G.nodes[c2]['votes'])
             normalization = w / min_vote
