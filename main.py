@@ -1,5 +1,6 @@
 import networkx as nx
 import pandas as pd
+import numpy as np
 from graph import Graph
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -57,6 +58,18 @@ for index, row in graph_data.iterrows():
             
         normalization = w / min_vote
 
+
+        adj_matrix = nx.to_numpy_array(G)
+
+        # Calculando a matriz de adjacência normalizada
+        normalized_adj_matrix = np.zeros(adj_matrix.shape)
+        for i in range(adj_matrix.shape[0]):
+            for j in range(adj_matrix.shape[1]):
+                if adj_matrix[i, j] != 0:
+                    normalized_adj_matrix[i, j] = 1 - adj_matrix[i, j]  # Aplicando a normalização
+
+
+
         if normalization >= threshold:
             inversion = 1 - normalization
             G.add_edge(c1, c2, weight=inversion)
@@ -104,7 +117,24 @@ legend_patches = [mpatches.Patch(color=color, label=party) for party, color in p
 plt.legend(handles=legend_patches, title="Partidos")
 
 plt.show()
-#pos = nx.spring_layout(G, scale=2.0)
+
+# Crie um array 2D de valores de centralidade Betwenness
+centralities = np.array(centralities_sorted).reshape(-1, 1)
+
+# Combine a matriz de adjacência normalizada com os valores de centralidade
+heatmap_data = np.hstack((normalized_adj_matrix, centralities))
+
+# Crie um mapa de cores para o heatmap
+cmap = plt.cm.get_cmap('YlOrRd')  # Escolha um mapa de cores
+
+# Plote o heatmap
+plt.figure(figsize=(10, 8))
+plt.imshow(heatmap_data, cmap=cmap, aspect='auto')
+plt.colorbar(label='Valor')
+plt.title('Heatmap de Adjacência Normalizada e Centralidade Betwenness')
+plt.xticks(np.arange(len(nodes_sorted)), nodes_sorted, rotation=90)
+plt.yticks([])
+plt.show()
 
 
 '''
