@@ -1,9 +1,6 @@
 import networkx as nx
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import random
-import matplotlib.colors as mcolors
 
 class Functions:
     def __init__(self, col_politicians, col_graph):
@@ -16,27 +13,25 @@ class Functions:
         self.parties_to_filter = []
         self.party_colors = {}
 
-    def get_data(self):
+    def get_data(self, year, threshold, parties):
         try:
-            year = int(input("Informe o ano a considerar (de 2001 a 2023) : "))
+            year = int(year)
             if year < 2001 or year > 2023:
                 raise ValueError
         except ValueError:
             print("ERRO! Ano inválido!")
-        
+
         self.politicians_data = pd.read_csv(f"datasets/politicians{year}.csv", encoding='utf-8', delimiter=';', header=None, names=self.col_politicians, engine='python')
         self.graph_data = pd.read_csv(f"datasets/graph{year}.csv", encoding='utf-8', delimiter=';', header=None, names=self.col_graph, engine='python')
 
         try:
-            self.threshold = float(input("Informe o percentual mínimo de concordância (ex . 0.9) : "))
+            self.threshold = float(threshold)
             if self.threshold < 0 or self.threshold > 1:
                 raise ValueError
         except ValueError:
             print("ERRO! Threshold inválido!")
 
-
-        analyse_partys = input("Informe os partidos a analisar, separados por espaco (ex . PT MDB PL) : ").upper()
-        self.parties_to_filter = analyse_partys.split()
+        self.parties_to_filter = parties
 
         return self.politicians_data, self.graph_data, self.parties_to_filter
     
@@ -107,7 +102,6 @@ class Functions:
         plt.yticks([])
         plt.tight_layout()
         plt.show()
-
 
     def plot_heatmap(self): #Heatmap somente até a parte da normalização
         rows = []
