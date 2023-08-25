@@ -1,12 +1,10 @@
 import networkx as nx
 import pandas as pd
 import numpy as np
-from graph import Graph
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 G = nx.Graph()
-g = Graph()
 
 # Dando nome para as colunas dos arquivos, afim de facilitar manipulá-las.
 col_politicians = ['congressman', 'party', 'votes']
@@ -78,7 +76,6 @@ for index, row in graph_data.iterrows():
 if value == 0:
     for index, row in politicians_data.iterrows():
         G.add_node(row['congressman'], votes=row['votes'])  #Adicionando o nó com o atributo 'votes'
-        g.add_node(row['congressman'])
 
     for index, row in graph_data.iterrows():
         c1 = row.congressman1  
@@ -107,9 +104,7 @@ plt.ylabel('Betwenness')
 plt.title("Medida de Centralidade")
 
 plt.show()
-#print(betwenness)
 
-#print(G)
 
 plt.figure(1)
 nx.draw_networkx(G, pos=nx.spring_layout(G, k=0.3), with_labels=True, node_color=[party_colors[G.nodes[n]['party']] for n in G.nodes()]) #utilizando o layout spring
@@ -117,60 +112,6 @@ legend_patches = [mpatches.Patch(color=color, label=party) for party, color in p
 plt.legend(handles=legend_patches, title="Partidos")
 
 plt.show()
-
-# Crie um array 2D de valores de centralidade Betwenness
-centralities = np.array(centralities_sorted).reshape(-1, 1)
-
-# Combine a matriz de adjacência normalizada com os valores de centralidade
-heatmap_data = np.hstack((normalized_adj_matrix, centralities))
-
-# Crie um mapa de cores para o heatmap
-cmap = plt.cm.get_cmap('YlOrRd')  # Escolha um mapa de cores
-
-# Plote o heatmap
-plt.figure(figsize=(10, 8))
-plt.imshow(heatmap_data, cmap=cmap, aspect='auto')
-plt.colorbar(label='Valor')
-plt.title('Heatmap de Adjacência Normalizada e Centralidade Betwenness')
-plt.xticks(np.arange(len(nodes_sorted)), nodes_sorted, rotation=90)
-plt.yticks([])
-plt.show()
-
-
-'''
-NORMALIZAÇÃO
-
-w(u, v) = w(u, v) / min(votes(u), votes(v))    
-
-u -> deputado 'u'
-v -> deputado 'v'
-
-1 - Para cada aresta (u, v) no grafo:
-    w(u, v) -> Peso da aresta entre eles;
-    votes(u) -> Número de votações que o deputado 'u' participou;
-    votes(v) -> Número de votações que o deputado 'v' participou;
-
-2 - Calculamos o mínimo entre o número de votações de u e v, representado por min(votes(u), votes(v)).
-    ***Por exemplo, suponha que o deputado u participou de 50 votações e o deputado v participou de 65 votações. 
-    Nesse caso, o mínimo entre o número de votações de u e v será 50, porque é o menor valor entre 50 (número de votações de u)
-    e 65 (número de votações de v).
-'''
-
-
-
-
-
-
-
-
-
-""" print(G.number_of_nodes())
-print(G.number_of_edges())
-print(g.node_count)
-print(g.edge_count)
-
-print(g) """
-
 
 
 
