@@ -1,9 +1,9 @@
 import networkx as nx
 import pandas as pd
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+import random
+import matplotlib.colors as mcolors
 
 class Functions:
     def __init__(self, col_politicians, col_graph):
@@ -14,6 +14,7 @@ class Functions:
         self.politicians_data = None
         self.graph_data = None
         self.parties_to_filter = []
+        self.party_colors = {}
 
     def get_data(self):
         try:
@@ -32,6 +33,7 @@ class Functions:
                 raise ValueError
         except ValueError:
             print("ERRO! Threshold inválido!")
+
 
         analyse_partys = input("Informe os partidos a analisar, separados por espaco (ex . PT MDB PL) : ").upper()
         self.parties_to_filter = analyse_partys.split()
@@ -66,7 +68,7 @@ class Functions:
 
             if c1 in self.is_in_parties_to_filter()['congressman'].values and c2 in self.is_in_parties_to_filter()['congressman'].values:
                 min_vote = min(self.politicians_data.loc[self.politicians_data['congressman'] == c1, 'votes'].values[0], 
-                               self.politicians_data.loc[self.politicians_data['congressman'] == c2, 'votes'].values[0])     
+                            self.politicians_data.loc[self.politicians_data['congressman'] == c2, 'votes'].values[0])     
                 normalization = self.normalization(w, min_vote)  
 
                 if normalization >= self.threshold:
@@ -90,12 +92,24 @@ class Functions:
         plt.show()
 
     def plot_graph(self):
-        pos = nx.spring_layout(self.G, k=0.3)  # Define a posição dos nós no layout
-        nx.draw_networkx(self.G, pos, with_labels=True)  # Plota o grafo
+        pos = nx.spring_layout(self.G)
+
+        nx.draw_networkx(
+            self.G,
+            pos,
+            with_labels=True,
+            node_size=200,
+            font_size=10,
+        )
+        # Personalize a aparência do gráfico
         plt.title("Grafo de Relações Políticas")
+        plt.xticks([])
+        plt.yticks([])
+        plt.tight_layout()
         plt.show()
 
-    def plot_heatmap(self):
+
+    def plot_heatmap(self): #Heatmap somente até a parte da normalização
         rows = []
         columns = []
         values = []
@@ -127,5 +141,6 @@ class Functions:
 
         plt.title("Heatmap de Relações Políticas")
         plt.xlabel("Deputados")
+        plt.xticks(rotation="vertical")
         plt.ylabel("Deputados")
         plt.show()
